@@ -22,6 +22,7 @@ Before indulging in ML modeling of complex nature, it is important to know the r
 - clipping
 - log scaling
 - z-score
+
 Next, we checked the Pearson correlation and visualized it through a heat map.  This shows which variables are highly correlated and in this case, “Qty” is highly correlated with “NetAmount”, “SalesExclGST” and “GST”.
 
 ## Machine Learning:
