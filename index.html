@@ -1,0 +1,1878 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Cambridge Garment Industries Sales Data Analysis Project</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Team-Shah-Nawaz" />
+    <meta name="date" content="2022-09-11" />
+    <script src="libs/header-attrs-2.16/header-attrs.js"></script>
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/uol-fonts.css" rel="stylesheet" />
+    <script src="libs/htmlwidgets-1.5.4/htmlwidgets.js"></script>
+    <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+    <link href="libs/leaflet-1.3.1/leaflet.css" rel="stylesheet" />
+    <script src="libs/leaflet-1.3.1/leaflet.js"></script>
+    <link href="libs/leafletfix-1.0.0/leafletfix.css" rel="stylesheet" />
+    <script src="libs/proj4-2.6.2/proj4.min.js"></script>
+    <script src="libs/Proj4Leaflet-1.0.1/proj4leaflet.js"></script>
+    <link href="libs/rstudio_leaflet-1.3.1/rstudio_leaflet.css" rel="stylesheet" />
+    <script src="libs/leaflet-binding-2.1.1/leaflet.js"></script>
+    <link href="libs/datatables-css-0.0.0/datatables-crosstalk.css" rel="stylesheet" />
+    <script src="libs/datatables-binding-0.24/datatables.js"></script>
+    <link href="libs/dt-core-1.11.3/css/jquery.dataTables.min.css" rel="stylesheet" />
+    <link href="libs/dt-core-1.11.3/css/jquery.dataTables.extra.css" rel="stylesheet" />
+    <script src="libs/dt-core-1.11.3/js/jquery.dataTables.min.js"></script>
+    <link href="libs/crosstalk-1.2.0/css/crosstalk.min.css" rel="stylesheet" />
+    <script src="libs/crosstalk-1.2.0/js/crosstalk.min.js"></script>
+    <link rel="stylesheet" href="my-theme.css" type="text/css" />
+    <link rel="stylesheet" href="ub_theme.css" type="text/css" />
+    <link rel="stylesheet" href="scrollable.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# Cambridge Garment Industries Sales Data Analysis Project
+]
+.subtitle[
+## From EDA to Machine Learning
+]
+.author[
+### Team-Shah-Nawaz
+]
+.date[
+### 2022-09-11
+]
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Project Description
+
+## General Overview
+
+![](/Users/snawaz/Downloads/telegram/photo.jpeg)
+
+* CAMBRIDGE GARMENTS Industry (CGI) is a leading fast fashion retailer in Pakistan, that deals in traditional and western clothing styles. 
+
+* The company has a presence in every major city of Pakistan, operating most of the stores by itself, which goes by the name The Cambridge Shop (TCS). 
+
+* CGI has captured the pulse of white-collar Pakistani men, who generally like to wear quality cotton shirts, with its craftsmanship and uncompromising quality. 
+
+
+&lt;iframe width="560" height="315" src="https://www.youtube.com/embed/3BXev-TBqKE" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen&gt;&lt;/iframe&gt;
+
+
+---
+
+# Data Overview
+
+* We got raw sales data for CGI Men’s shirt, which is typically used in the Supply Chain department for sales tracking and stock movement analysis. 
+
+* The data has multiple numerical and many categorical variables. 
+
+* The data is invoice influenced, where each record represents a portion of the transaction or a value of a particular shirt brand sold.
+
+* To make use of this data for any Exploratory Data Analysis (EDA) and Machine Learning (ML), it is necessary to clean the data and adapt it according to our requirements.
+
+* The initial dataset contains 46 columns and 670,000 records, where each record is identified by a “BillNo”.
+
+* Each record contains information about the sold out shirt from TCS related to a particular “cobrand”, which results in multiple record of similar “BillNo” but of different “cobrands”.
+
+
+
+
+* With clean data, we compare the location of TCS and prepare the location data of 68 positions with the help of Google Maps.  This data is further used to present locations on maps.
+
+
+```r
+library(ggmap)
+library(OpenStreetMap)
+library(leaflet)
+#| fig.cap = "Locations of online and offline stores in Pakistan. Products are delivered by TCS delivery which are shown by pins as well on Open Street Map. Each pin location shows the delivery point either on site or online."
+
+loca_data = read_csv("/Users/snawaz/Documents/pychilla2/teamproject_sep3/Deep_note_linked/local latandlong.csv")
+
+points = st_as_sf(loca_data, coords = c("long", "lat"), crs = 4326)
+
+map = leaflet()
+map = addTiles(map)
+coordinates = st_coordinates(st_transform(points, 4326))
+map = addMarkers(map, coordinates[,1], coordinates[,2], label=loca_data$Location, 
+	popup=paste0(loca_data$Location, "&lt;br/&gt;", loca_data$RegionName))
+
+map
+```
+
+<div id="htmlwidget-c4bf68e160c2a73f3a13" style="width:504px;height:504px;" class="leaflet html-widget"></div>
+<script type="application/json" data-for="htmlwidget-c4bf68e160c2a73f3a13">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",null,null,{"minZoom":0,"maxZoom":18,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"attribution":"&copy; <a href=\"https://openstreetmap.org\">OpenStreetMap<\/a> contributors, <a href=\"https://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA<\/a>"}]},{"method":"addMarkers","args":[[24.856297688546,24.802336764241,24.935743487023,24.876917951384,24.827411466309,24.941508555613,24.909143784369,24.879843905754,24.904106273884,24.814281411411,24.865497171885,25.386360611498,24.917023714915,24.932566621264,24.932566621264,24.935743487023,24.802336764241,24.856297688546,24.876917951384,31.510696198207,31.527806637875,31.532757476009,31.473270942928,31.473270942928,31.468364554921,31.50825844557,31.56045327,31.475044436812,31.445610882769,31.467137360067,31.471757797248,31.467981598949,31.473270942928,31.467981598949,31.475117639,33.730475459608,33.730475459608,33.730475459608,33.730475459608,33.730475459608,33.72094952153,33.72094952153,33.72094952153,34.000233308056,33.72094952153,33.595803471116,33.521258480603,33.521258480603,33.72094952153,31.40532802307,30.327966129679,32.102889555181,32.064214647334,32.513507574486,31.410673801229,31.40532802307,31.412046492458,31.14719231922,31.410673801229,32.513507574486,32.103984407534,24.917023714915,24.917023714915,24.909143784369,24.909143784369,24.917023714915,24.909143784369],[67.030271396985,67.030008749868,67.040293496986,67.062655754656,67.037830183491,67.04617456869,67.006844476089,67.065513847908,67.076040043199,67.027157825819,67.078896383492,68.367091858847,67.010750263103,67.087263796986,67.087263796986,67.040293496986,67.030008749868,67.030271396985,67.062655754656,74.343490281819,74.350659199917,74.363266612505,74.378214427846,74.378214427846,74.316731241339,74.347948639491,74.32234535709,74.378254397161,74.271576581817,74.315976970175,74.355585112503,74.266658225996,74.378214427846,74.266658225996,74.378200752983,73.07775901526,73.07775901526,73.07775901526,73.07775901526,73.07775901526,73.055458581887,73.055458581887,73.055458581887,71.541286223481,73.055458581887,73.052405309989,73.15885658373,73.15885658373,73.055458581887,73.108385770173,71.47257212007,74.18943449718,72.692460783685,74.574864664864,73.117309399917,73.108385770173,73.11654125483,72.686111098839,73.117309399917,74.574864664864,74.189544791022,67.010750263103,67.010750263103,67.006844476089,67.006844476089,67.010750263103,67.006844476089],null,null,null,{"interactive":true,"draggable":false,"keyboard":true,"title":"","alt":"","zIndexOffset":0,"opacity":1,"riseOnHover":false,"riseOffset":250},["TCS Atrium Mall<br/>1-KARACHI","TCS DOLMEN CITY<br/>1-KARACHI","TCS Dolmen Mall -Hyderi<br/>1-KARACHI","TCS Dolmen Mall - Tariq Road<br/>1-KARACHI","TCS The Forum<br/>1-KARACHI","TCS HYDERI BLOCK-H<br/>1-KARACHI","CAMBRIDGE ONLINE STORE<br/>1-KARACHI","TCS BAHADURABAD<br/>1-KARACHI","TCS GULSHAN<br/>1-KARACHI","TCS Park Tower - 2<br/>1-KARACHI","SANAULLA & CO (CLOSED)<br/>1-KARACHI","TCS MODERN SADDAR HYD<br/>1-KARACHI","ZEEN ONLINE STORE<br/>1-KARACHI","TCS LUCKY ONE - CAMBRIDGE<br/>1-KARACHI","TCS LUCKY ONE - ZEEN<br/>1-KARACHI","TCS Zeen Dolmen Mall Hyderi<br/>1-KARACHI","TCS ZEEN DOLMEN CITY<br/>1-KARACHI","TCS ZEEN ATRIUM MALL<br/>1-KARACHI","TCS ZEEN DOLMEN TARIQ ROAD<br/>1-KARACHI","ENEM ENTERPRISES (CLOSED)<br/>2-LAHORE","TCS Fountain-Avenue-Lhr<br/>2-LAHORE","TCS FORTRESS SQUARE<br/>2-LAHORE","HKB DEFENCE (CLOSED)<br/>2-LAHORE","HKB LIBERTY<br/>2-LAHORE","RAJA SAHIB LINK ROAD<br/>2-LAHORE","RAJA SAHIB LIBERTY<br/>2-LAHORE","THE SHOPPE-2<br/>2-LAHORE","TCS Z BLOCK DHA<br/>2-LAHORE","RAJA SAHIB - WAPDA TOWN (CLOSED)<br/>2-LAHORE","TCS AMANAH MALL - LAHORE<br/>2-LAHORE","TCS PACKAGES MALL - LAHORE<br/>2-LAHORE","TCS NISHAT EMPORIUM - 2 (Cambridge)<br/>2-LAHORE","HKB DEFENCE - Y-BLOCK<br/>2-LAHORE","TCS NISHAT EMPORIUM - ZEEN<br/>2-LAHORE","TCS Y - BLOCK  - LAHORE<br/>2-LAHORE","ALAM STORE<br/>3-NORTH","AL SAEED SUPER STORE<br/>3-NORTH","SANA ENTERPRISES<br/>3-NORTH","TCS BEVERLY CENTER<br/>3-NORTH","TCS CLASSIC DEPARTMENTAL STORE (CLOSED)<br/>3-NORTH","HASSAN ENTERPRISES (CLOSED)<br/>3-NORTH","SANA VENTURE (CLOSED)<br/>3-NORTH","SANA STYLE<br/>3-NORTH","TCS WADUD SONS<br/>3-NORTH","TCS SAFA GOLD MALL - G.FLR<br/>3-NORTH","TCS IDREES BOOK ZEEN- RWP<br/>3-NORTH","TCS GIGA MALL-WTC-Cambridge<br/>3-NORTH","TCS GIGA MALL-WTC-Zeen<br/>3-NORTH","TCS SAFA MALL - ZEEN<br/>3-NORTH","GALAXY PLUS<br/>4-CENTRAL PUNJAB","GULGASHT TOWN - MULTAN<br/>4-CENTRAL PUNJAB","TCS KINGS MALL GUJRANWALA<br/>4-CENTRAL PUNJAB","TCS Chen-One-Tower- (CLOSED)<br/>4-CENTRAL PUNJAB","TCS Sialkot Cantt<br/>4-CENTRAL PUNJAB","TCS RCG MALL - FAISALABAD<br/>4-CENTRAL PUNJAB","GALAXY PLUS 1 (M.IRFAN)<br/>4-CENTRAL PUNJAB","DO BURJ - FSD - ZEEN<br/>4-CENTRAL PUNJAB","GOJRA - ZEEN  (RAFIQ CENTRE)<br/>4-CENTRAL PUNJAB","RCG MALL - ZEEN<br/>4-CENTRAL PUNJAB","SIALKOT (2) - ZEEN<br/>4-CENTRAL PUNJAB","TCS GUJRANWALA SATELLITE TOWN<br/>4-CENTRAL PUNJAB","CG Main Store  / A-5 2nd floor (CLOSED)<br/>5-WAREHOUSES","A-5 LOOSE WAREHOUSE<br/>5-WAREHOUSES","B-53 LOOSE WAREHOUSE<br/>5-WAREHOUSES","A-5 LOOSE WAREHOUSE (GROUND FLOOR)<br/>6-SUB STORE","KORANGI EDHI STORE (PRESS DEPARTMENT)<br/>7- EXCLUDE SUB STORES","EXHIBITION<br/>1-KARACHI"],null,null,null,["TCS Atrium Mall","TCS DOLMEN CITY","TCS Dolmen Mall -Hyderi","TCS Dolmen Mall - Tariq Road","TCS The Forum","TCS HYDERI BLOCK-H","CAMBRIDGE ONLINE STORE","TCS BAHADURABAD","TCS GULSHAN","TCS Park Tower - 2","SANAULLA &amp; CO (CLOSED)","TCS MODERN SADDAR HYD","ZEEN ONLINE STORE","TCS LUCKY ONE - CAMBRIDGE","TCS LUCKY ONE - ZEEN","TCS Zeen Dolmen Mall Hyderi","TCS ZEEN DOLMEN CITY","TCS ZEEN ATRIUM MALL","TCS ZEEN DOLMEN TARIQ ROAD","ENEM ENTERPRISES (CLOSED)","TCS Fountain-Avenue-Lhr","TCS FORTRESS SQUARE","HKB DEFENCE (CLOSED)","HKB LIBERTY","RAJA SAHIB LINK ROAD","RAJA SAHIB LIBERTY","THE SHOPPE-2","TCS Z BLOCK DHA","RAJA SAHIB - WAPDA TOWN (CLOSED)","TCS AMANAH MALL - LAHORE","TCS PACKAGES MALL - LAHORE","TCS NISHAT EMPORIUM - 2 (Cambridge)","HKB DEFENCE - Y-BLOCK","TCS NISHAT EMPORIUM - ZEEN","TCS Y - BLOCK  - LAHORE","ALAM STORE","AL SAEED SUPER STORE","SANA ENTERPRISES","TCS BEVERLY CENTER","TCS CLASSIC DEPARTMENTAL STORE (CLOSED)","HASSAN ENTERPRISES (CLOSED)","SANA VENTURE (CLOSED)","SANA STYLE","TCS WADUD SONS","TCS SAFA GOLD MALL - G.FLR","TCS IDREES BOOK ZEEN- RWP","TCS GIGA MALL-WTC-Cambridge","TCS GIGA MALL-WTC-Zeen","TCS SAFA MALL - ZEEN","GALAXY PLUS","GULGASHT TOWN - MULTAN","TCS KINGS MALL GUJRANWALA","TCS Chen-One-Tower- (CLOSED)","TCS Sialkot Cantt","TCS RCG MALL - FAISALABAD","GALAXY PLUS 1 (M.IRFAN)","DO BURJ - FSD - ZEEN","GOJRA - ZEEN  (RAFIQ CENTRE)","RCG MALL - ZEEN","SIALKOT (2) - ZEEN","TCS GUJRANWALA SATELLITE TOWN","CG Main Store  / A-5 2nd floor (CLOSED)","A-5 LOOSE WAREHOUSE","B-53 LOOSE WAREHOUSE","A-5 LOOSE WAREHOUSE (GROUND FLOOR)","KORANGI EDHI STORE (PRESS DEPARTMENT)","EXHIBITION"],{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]}],"limits":{"lat":[24.802336764241,34.000233308056],"lng":[67.006844476089,74.574864664864]}},"evals":[],"jsHooks":[]}</script>
+
+---
+
+# Flow chart of the project
+
+![Steps followed in the project](/Users/snawaz/Downloads/telegram/flow_chart_data.png)
+
+---
+
+# Exploratory Data Analysis (EDA)
+
+* It is important to name variables according to the data they hold and eliminates columns with similar data. This is perhaps the most important thing when one wrangles the actual data. 
+
+* EDA includes the renaming of variables, eliminating variables, and comparing them to check whether they represent the data accordingly, through various graphs and charts.
+
+* Lastly, it is important to check the summary statistics of the data. 
+
+### Step1 - Import modules 
+
+
+
+### Step2: Import data
+
+
+```python
+df1=pd.read_excel('/Users/snawaz/Documents/pychilla2/teamproject_sep3/Deep_note_linked/Sales.xlsx')
+```
+
+### Step3: Check shape of Data
+
+
+```python
+df=df1.copy()
+del(df1)
+rows,cols=df.shape
+print("Number of rows in dataset are",rows)
+```
+
+```
+## Number of rows in dataset are 670082
+```
+
+```python
+print("Number of columns in the dataset are",cols)
+```
+
+```
+## Number of columns in the dataset are 45
+```
+
+
+---
+
+### Step 4: Check the data types of the columns
+
+
+```python
+df.info()
+```
+
+```
+## &lt;class 'pandas.core.frame.DataFrame'&gt;
+## RangeIndex: 670082 entries, 0 to 670081
+## Data columns (total 45 columns):
+##  #   Column             Non-Null Count   Dtype         
+## ---  ------             --------------   -----         
+##  0   BillNo             670082 non-null  object        
+##  1   BillDate           670082 non-null  datetime64[ns]
+##  2   LoyaltyCard        33720 non-null   object        
+##  3   Customer           661558 non-null  object        
+##  4   Description        66014 non-null   object        
+##  5   BillMonth          670082 non-null  object        
+##  6   Warehouse          670082 non-null  object        
+##  7   RegionName         670082 non-null  object        
+##  8   Location           670082 non-null  object        
+##  9   Category           670082 non-null  object        
+##  10  DepartmentName     670082 non-null  object        
+##  11  BrandName          668530 non-null  object        
+##  12  CoBrand            670082 non-null  object        
+##  13  Barcode            670082 non-null  int64         
+##  14  DesignNo           670082 non-null  object        
+##  15  Rejection          670082 non-null  object        
+##  16  SeasonName         670082 non-null  object        
+##  17  Attribute1         670057 non-null  object        
+##  18  Attribute2         143125 non-null  object        
+##  19  Attribute3         309262 non-null  object        
+##  20  Attribute4         670082 non-null  object        
+##  21  Attribute5         337322 non-null  object        
+##  22  Attribute6         0 non-null       float64       
+##  23  Attribute7         0 non-null       float64       
+##  24  Attribute8         490234 non-null  object        
+##  25  LocalImport        670082 non-null  object        
+##  26  Color              670082 non-null  object        
+##  27  Sizes              670082 non-null  object        
+##  28  DiscountType       502886 non-null  object        
+##  29  SalesmanName       670082 non-null  object        
+##  30  Qty                670082 non-null  int64         
+##  31  SalesReturnReason  14786 non-null   object        
+##  32  Price              670082 non-null  int64         
+##  33  Amount             670082 non-null  int64         
+##  34  SaleExclGST        670082 non-null  float64       
+##  35  GSTP               670082 non-null  int64         
+##  36  GST                670082 non-null  int64         
+##  37  DiscPer            670082 non-null  float64       
+##  38  DiscAmount         670082 non-null  float64       
+##  39  BarcodeDiscPer     670082 non-null  int64         
+##  40  BarcodeDiscount    670082 non-null  int64         
+##  41  NetAmount          670082 non-null  float64       
+##  42  PointsEarned       670082 non-null  int64         
+##  43  TaxPer             670082 non-null  int64         
+##  44  Cobrand Acc        670082 non-null  object        
+## dtypes: datetime64[ns](1), float64(6), int64(10), object(28)
+## memory usage: 230.1+ MB
+```
+
+### Step 5: Check the first 5 rows of the data
+
+
+```r
+DT::datatable(head(py$df,20), options = list(pageLength = 5,scrollX=T))
+```
+
+<div id="htmlwidget-14968fb1a155bc0495bb" style="width:100%;height:auto;" class="datatables html-widget"></div>
+<script type="application/json" data-for="htmlwidget-14968fb1a155bc0495bb">{"x":{"filter":"none","vertical":false,"data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"],["SALM-010116-00003","SALM-010116-00009","SALM-010116-00009","SALM-010116-00011","SALM-010116-00011","SALM-010116-00014","SALM-010116-00017","SALM-010116-00018","SALM-010116-00019","SALM-010116-00020","SALM-010116-00022","SALM-010116-00025","SALM-010116-00028","SALM-010116-00029","SALM-010116-00034","SALM-010116-00034","SALM-010216-00001","SALM-010216-00004","SALM-010216-00005","SALM-010216-00006"],["2016-01-01T00:00:00Z","2016-01-01T00:00:00Z","2016-01-01T00:00:00Z","2016-01-01T00:00:00Z","2016-01-01T00:00:00Z","2016-01-01T00:00:00Z","2016-01-01T00:00:00Z","2016-01-01T00:00:00Z","2016-01-01T00:00:00Z","2016-01-01T00:00:00Z","2016-01-01T00:00:00Z","2016-01-01T00:00:00Z","2016-01-01T00:00:00Z","2016-01-01T00:00:00Z","2016-01-01T00:00:00Z","2016-01-01T00:00:00Z","2016-02-01T00:00:00Z","2016-02-01T00:00:00Z","2016-02-01T00:00:00Z","2016-02-01T00:00:00Z"],[[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null]],[["."],["Mr.Shoaib sadiique"],["Mr.Shoaib sadiique"],["Mr.Adil"],["Mr.Adil"],["."],["."],["."],["."],["."],["."],["."],["."],["."],["."],["."],["."],["."],["."],["."]],[[null],["Exchnage"],["Exchnage"],["Exchange"],["Exchange"],[null],[null],[null],[null],[null],[null],[null],["exchange"],[null],[null],[null],[null],[null],[null],[null]],["2016-01","2016-01","2016-01","2016-01","2016-01","2016-01","2016-01","2016-01","2016-01","2016-01","2016-01","2016-01","2016-01","2016-01","2016-01","2016-01","2016-02","2016-02","2016-02","2016-02"],["No","No","No","No","No","No","No","No","No","No","No","No","No","No","No","No","No","No","No","No"],["3-NORTH ","3-NORTH ","3-NORTH ","3-NORTH ","3-NORTH ","3-NORTH ","3-NORTH ","3-NORTH ","3-NORTH ","3-NORTH ","3-NORTH ","3-NORTH ","3-NORTH ","3-NORTH ","3-NORTH ","3-NORTH ","3-NORTH ","3-NORTH ","3-NORTH ","3-NORTH "],["ALAM STORE","ALAM STORE","ALAM STORE","ALAM STORE","ALAM STORE","ALAM STORE","ALAM STORE","ALAM STORE","ALAM STORE","ALAM STORE","ALAM STORE","ALAM STORE","ALAM STORE","ALAM STORE","ALAM STORE","ALAM STORE","ALAM STORE","ALAM STORE","ALAM STORE","ALAM STORE"],["MENS SHIRT              ","MENS SHIRT              ","MENS SHIRT              ","MENS SHIRT              ","MENS SHIRT              ","MENS SHIRT              ","MENS SHIRT              ","MENS SHIRT              ","MENS SHIRT              ","MENS SHIRT              ","MENS SHIRT              ","MENS SHIRT              ","MENS SHIRT              ","MENS SHIRT              ","MENS SHIRT              ","MENS SHIRT              ","MENS SHIRT              ","MENS SHIRT              ","MENS SHIRT              ","MENS SHIRT              "],["LICENSE ","CAMBRIDGE ","CAMBRIDGE ","CAMBRIDGE ","CAMBRIDGE ","CAMBRIDGE ","CAMBRIDGE ","CAMBRIDGE ","CAMBRIDGE ","LICENSE ","CAMBRIDGE ","CAMBRIDGE ","CAMBRIDGE ","CAMBRIDGE ","LICENSE ","CAMBRIDGE ","CAMBRIDGE ","CAMBRIDGE ","CAMBRIDGE ","CAMBRIDGE "],[["LICENSE FULL SLEEVE "],["LUXER"],["LUXER"],["LUXER"],["LUXER"],["EXECUTIVE "],["PRINCIPLE SHIRT "],["LUXER"],["PRINCIPLE SHIRT "],["LICENSE FULL SLEEVE "],["EXECUTIVE "],["LUXER"],["LUXER"],["LUXER"],["LICENSE FULL SLEEVE "],["PRINCIPLE SHIRT "],["LUXER"],["PRINCIPLE SHIRT "],["PRINCIPLE SHIRT "],["LUXER"]],["LICENSE F/S              ","LUXER PLAIN F/S","LUXER PLAIN F/S","LUXER PLAIN F/S","LUXER PLAIN F/S","Cambridge Executive F/S","PRINCIPLE PLAIN F/S      ","LUXER PLAIN F/S","PRINCIPLE CLASSIC F/S    ","LICENSE F/S              ","Cambridge Executive F/S","LUXER PLAIN F/S","LUXER F/S","LUXER F/S","LICENSE F/S              ","PRINCIPLE SWAN F/S","LUXER PLAIN F/S","PRINCIPLE CLASSIC F/S    ","PRINCIPLE PLAIN F/S      ","LUXER F/S"],[492146,464028,464945,464924,464954,486942,487819,464002,479503,492143,477035,464013,489645,466926,488255,489495,490640,471339,492531,475151],["B5393","B6335","B6336","B6336","B6336","B9344","B10044","B6335","B10038","B5392","B9115","B6335","B11039","B6340","B5385","B10047","B-315","B7919","B10069","B6354"],["No","No","No","No","No","No","No","No","No","No","No","No","No","No","No","No","No","No","No","No"],["WINTER 2015 - 2016","SUMMER 2015","SUMMER 2015","SUMMER 2015","SUMMER 2015","WINTER 2015 - 2016","WINTER 2015 - 2016","SUMMER 2015","SUMMER 2015","WINTER 2015 - 2016","SUMMER 2015","SUMMER 2015","WINTER 2015 - 2016","SUMMER 2015","WINTER 2015 - 2016","WINTER 2015 - 2016","SUMMER 2016","SUMMER 2015","SUMMER 2016","SUMMER 2015"],[["1 Year & Above (Discounted)"],["1 Year & Above (Discounted)"],["1 Year & Above (Discounted)"],["1 Year & Above (Discounted)"],["1 Year & Above (Discounted)"],["1 Year & Above (Discounted)"],["1 Year & Above (Discounted)"],["1 Year & Above (Discounted)"],["1 Year & Above (Discounted)"],["1 Year & Above (Discounted)"],["1 Year & Above (Discounted)"],["1 Year & Above (Discounted)"],["1 Year & Above (Discounted)"],["1 Year & Above (Discounted)"],["1 Year & Above (Discounted)"],["1 Year & Above (Discounted)"],["1 Year & Above (Discounted)"],["No Stock"],["1 Year & Above (Discounted)"],["1 Year & Above (Discounted)"]],[["Buy 1 Get 1 free"],[null],[null],[null],[null],[null],[null],[null],[null],["Buy 1 Get 1 free"],[null],[null],[null],[null],["Buy 1 Get 1 free"],[null],[null],[null],[null],[null]],[[null],["PAKISTAN "],["PAKISTAN "],["PAKISTAN "],["PAKISTAN "],["PAKISTAN "],["PAKISTAN "],["PAKISTAN "],["PAKISTAN "],[null],["PAKISTAN "],["PAKISTAN "],["PAKISTAN "],["PAKISTAN "],[null],["PAKISTAN "],["PAKISTAN "],["PAKISTAN "],["PAKISTAN "],["PAKISTAN "]],["CAMBRIDGE","CAMBRIDGE","CAMBRIDGE","CAMBRIDGE","CAMBRIDGE","CAMBRIDGE","CAMBRIDGE","CAMBRIDGE","CAMBRIDGE","CAMBRIDGE","CAMBRIDGE","CAMBRIDGE","CAMBRIDGE","CAMBRIDGE","CAMBRIDGE","CAMBRIDGE","CAMBRIDGE","CAMBRIDGE","CAMBRIDGE","CAMBRIDGE"],[[null],["A"],["B"],["B"],["B"],["B"],["A"],["A"],["B"],[null],["B"],["A"],["A"],["A"],["B"],["A"],["A"],["B"],["A"],["A"]],[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],[[null],["Regular"],["Regular"],["Regular"],["Regular"],["Regular"],["Premium"],["Regular"],["Regular"],[null],["Regular"],["Regular"],["Regular"],["Regular"],[null],["Premium"],["Regular"],["Regular"],["Premium"],["Regular"]],["Local","Local","Local","Local","Local","Local","Local","Local","Local","Local","Local","Local","Local","Local","Local","Local","Local","Local","Local","Local"],["Forest Teal","Pool Blue","L/GREEN        ","BLUE           ","MEHROON        ","MIX            ","L/BLUE         ","Ultra Voilet","PINK/WHITE     ","DEEP MELON","MIX            ","NUGGET","BLUE           ","YELLOW         ","BLACK Plaid","WHITE          ","SKY BLUE       ","L/GREY         ","WHITE          ","TURQ "],[["LAR  "],[16],["14½  "],["14½  "],["15½  "],["16½  "],["16½  "],[17],["15½  "],["MED  "],["14½  "],["15½  "],["16½  "],["16½  "],["LAR  "],["16½  "],["16½  "],[16],[16],["16½  "]],[[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null],[null]],[["840 WASEER"],["836 AMEER ZAIB"],["836 AMEER ZAIB"],["836 AMEER ZAIB"],["836 AMEER ZAIB"],["2582 AWAIS"],["2558 BABAR"],["2581 WAQAR "],["840 WASEER"],["2581 WAQAR "],["836 AMEER ZAIB"],["836 AMEER ZAIB"],["836 AMEER ZAIB"],["836 AMEER ZAIB"],["836 AMEER ZAIB"],["836 AMEER ZAIB"],["2581 WAQAR "],["2558 BABAR"],["2582 AWAIS"],["2582 AWAIS"]],[1,-1,-1,-1,-1,1,1,1,1,1,1,1,-1,1,1,1,1,1,1,1],[[null],["DISLIKE "],["DISLIKE "],["DISLIKE "],["DISLIKE "],[null],[null],[null],[null],[null],[null],[null],["COLOR"],[null],[null],[null],[null],[null],[null],[null]],[1710,1614,1805,1805,1805,2376,3138,1614,3424,1710,2376,1614,1900,1900,1614,3424,1805,3424,3329,1900],[1710,-1614,-1805,-1805,-1805,2376,3138,1614,3424,1710,2376,1614,-1900,1900,1614,3424,1805,3424,3329,1900],[1368,-1614,-1805,-1805,-1805,2020,3138,1614,3424,1368,2020,1614,-1900,1900,1614,3424,1805,2397,3329,1330],[5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5],[68,-81,-90,-90,-90,101,157,81,171,68,101,81,-95,95,81,171,90,120,166,66],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[20,0,0,0,0,15,0,0,0,20,15,0,0,0,0,0,0,30,0,30],[342,0,0,0,0,356,0,0,0,342,356,0,0,0,0,0,0,1027,0,570],[1436,-1695,-1895,-1895,-1895,2121,3295,1695,3595,1436,2121,1695,-1995,1995,1695,3595,1895,2517,3495,1396],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6],["F/S LICENSE                  ","F/S LUXER PLAIN ","F/S LUXER PLAIN ","F/S LUXER PLAIN ","F/S LUXER PLAIN ","F/S CAMBRIDGE EXECUTIVE ","F/S PRINCIPLE PLAIN    ","F/S LUXER PLAIN ","F/S PRINCIPLE CLASSIC YARN DYED","F/S LICENSE                  ","F/S CAMBRIDGE EXECUTIVE ","F/S LUXER PLAIN ","F/S LUXER YARN DYED ","F/S LUXER YARN DYED ","F/S LICENSE                  ","F/S PRINCIPLE SWAN ","F/S LUXER PLAIN ","F/S PRINCIPLE CLASSIC YARN DYED","F/S PRINCIPLE PLAIN    ","F/S LUXER YARN DYED "]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>BillNo<\/th>\n      <th>BillDate<\/th>\n      <th>LoyaltyCard<\/th>\n      <th>Customer<\/th>\n      <th>Description<\/th>\n      <th>BillMonth<\/th>\n      <th>Warehouse<\/th>\n      <th>RegionName<\/th>\n      <th>Location<\/th>\n      <th>Category<\/th>\n      <th>DepartmentName<\/th>\n      <th>BrandName<\/th>\n      <th>CoBrand<\/th>\n      <th>Barcode<\/th>\n      <th>DesignNo<\/th>\n      <th>Rejection<\/th>\n      <th>SeasonName<\/th>\n      <th>Attribute1<\/th>\n      <th>Attribute2<\/th>\n      <th>Attribute3<\/th>\n      <th>Attribute4<\/th>\n      <th>Attribute5<\/th>\n      <th>Attribute6<\/th>\n      <th>Attribute7<\/th>\n      <th>Attribute8<\/th>\n      <th>LocalImport<\/th>\n      <th>Color<\/th>\n      <th>Sizes<\/th>\n      <th>DiscountType<\/th>\n      <th>SalesmanName<\/th>\n      <th>Qty<\/th>\n      <th>SalesReturnReason<\/th>\n      <th>Price<\/th>\n      <th>Amount<\/th>\n      <th>SaleExclGST<\/th>\n      <th>GSTP<\/th>\n      <th>GST<\/th>\n      <th>DiscPer<\/th>\n      <th>DiscAmount<\/th>\n      <th>BarcodeDiscPer<\/th>\n      <th>BarcodeDiscount<\/th>\n      <th>NetAmount<\/th>\n      <th>PointsEarned<\/th>\n      <th>TaxPer<\/th>\n      <th>Cobrand Acc<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":5,"scrollX":true,"columnDefs":[{"className":"dt-right","targets":[14,23,24,31,33,34,35,36,37,38,39,40,41,42,43,44]},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[5,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
+
+---
+
+### Step 6: Check the null values and dropping useless columns
+
+
+
+```
+##                    percent_missing
+## BillNo                    0.000000
+## BillDate                  0.000000
+## LoyaltyCard              94.967780
+## Customer                  1.272083
+## Description              90.148370
+## BillMonth                 0.000000
+## Warehouse                 0.000000
+## RegionName                0.000000
+## Location                  0.000000
+## Category                  0.000000
+## DepartmentName            0.000000
+## BrandName                 0.231613
+## CoBrand                   0.000000
+## Barcode                   0.000000
+## DesignNo                  0.000000
+## Rejection                 0.000000
+## SeasonName                0.000000
+## Attribute1                0.003731
+## Attribute2               78.640674
+## Attribute3               53.847141
+## Attribute4                0.000000
+## Attribute5               49.659594
+## Attribute6              100.000000
+## Attribute7              100.000000
+## Attribute8               26.839700
+## LocalImport               0.000000
+## Color                     0.000000
+## Sizes                     0.000000
+## DiscountType             24.951573
+## SalesmanName              0.000000
+## Qty                       0.000000
+## SalesReturnReason        97.793404
+## Price                     0.000000
+## Amount                    0.000000
+## SaleExclGST               0.000000
+## GSTP                      0.000000
+## GST                       0.000000
+## DiscPer                   0.000000
+## DiscAmount                0.000000
+## BarcodeDiscPer            0.000000
+## BarcodeDiscount           0.000000
+## NetAmount                 0.000000
+## PointsEarned              0.000000
+## TaxPer                    0.000000
+## Cobrand Acc               0.000000
+```
+
+
+```python
+msno.matrix(df)
+```
+
+&lt;img src="project_2_modified_files/figure-html/unnamed-chunk-13-1.png" width="2400" /&gt;
+
+
+* Columns Attribute6 and 7 have 100% missing values. 
+* In `Attribute4`and `Category` column has only 1 string value so we are dropping 
+* Column `Salemanname` and `Barcode` is irrelvant. 
+
+We drop all columns by code below. 
+
+
+```python
+df.drop(['Attribute6','Attribute7'],axis=1,inplace=True)
+df.drop('Attribute4',axis=1,inplace=True)
+df.drop('SalesmanName',axis=1,inplace=True)
+df.drop('Category',axis=1,inplace=True)
+df.drop('Barcode',axis=1,inplace=True)
+```
+
+---
+
+### Step 7: Dropping useless columns
+
+The data between columns `CoBrand` and `CoBrand Acc` is 99% similar so we are keeping only column out of it.
+
+
+```python
+from fuzzywuzzy import fuzz
+
+fuzz.token_sort_ratio(df['CoBrand'], df['Cobrand Acc'])
+```
+
+
+
+```python
+df.drop('CoBrand',axis=1,inplace=True)
+```
+
+---
+
+## Data Preprocessing
+
+### Step 8 : Renaming some columns 
+
+Based on the data description, we are renaming some columns to make it more readable
+
+* Attribute1 is the Inventory_status which shows the cloth which come back to ware house and go back for sales
+* Attribute2 is the offer ctypes at the shops.
+* Attribute8 is the type of the cloth.
+* Attribute3 is the import from which cloth is imported. 
+
+
+```python
+df = df.rename(columns={'Attribute1':'Inventory_status',
+'Attribute2':'Offers','Attribute8':'Class_of_cloth',
+'Attribute3':'Import_type'})
+```
+
+### For customer column
+
+* Using returning and non-returning customers. 
+* We identify the customers by names and assume that customers with identical names is actually a returning customer.
+
+
+
+```python
+df['Customer']=df.Customer.duplicated()
+*df['Customer'].replace(True,'Returning_Costumer',inplace=True)
+*df['Customer'].replace(False,'NoN_Returning_Costumer',inplace=True)
+```
+
+* For loyalty card column. We replaced `NaNs` with `No` and `Yes` for the rest of the values.
+* LoyaltyCard is the actually card offered to customers to get discounts and offers. 
+
+
+```python
+df['LoyaltyCard']=df.LoyaltyCard.duplicated()
+df['LoyaltyCard'].replace(True,'Yes',inplace=True)
+df['LoyaltyCard'].replace(False,'No',inplace=True)
+```
+---
+
+
+### Step 9 :Column Imputing by sklearn Imputing
+We used the sklearn imputer to impute the missing values in the data. We used the most frequent value to impute the missing values in the data.
+
+
+```python
+imp = SimpleImputer(strategy="most_frequent")
+df['Inventory_status']=imp.fit_transform(df[['Inventory_status']])
+
+*imp = SimpleImputer(strategy="most_frequent")
+df['Import_type']=imp.fit_transform(df[['Import_type']])
+
+df['Offers']=imp.fit_transform(df[['Offers']])
+df['Attribute5']=imp.fit_transform(df[['Attribute5']])
+df['BrandName']=imp.fit_transform(df[['BrandName']])
+df['Description']=imp.fit_transform(df[['Description']])
+df['Inventory_status']=imp.fit_transform(df[['Inventory_status']])
+
+df.SalesReturnReason = df.SalesReturnReason.replace(np.nan,'No information available')
+df.Class_of_cloth = df.Class_of_cloth.replace(np.nan, "No information") # replacing Nan values with 0 value
+
+df.DiscountType = df.DiscountType.replace(np.nan, 'No Discount') # replacing Nan values with Most  frequent value
+```
+
+---
+
+### Step 10: Summary of the data
+
+
+```python
+df.describe().T
+```
+
+```
+##                     count         mean          std  ...     50%     75%       max
+## Qty              670082.0     0.899518     0.611418  ...     1.0     1.0      45.0
+## Price            670082.0  2437.725566   714.776793  ...  2259.0  2376.0    6127.0
+## Amount           670082.0  2173.785338  1621.785795  ...  2259.0  2376.0  106920.0
+## SaleExclGST      670082.0  1740.625980  1489.339984  ...  1663.0  2186.0   77455.0
+## GSTP             670082.0     6.092880     2.285465  ...     6.0     6.0      17.0
+## GST              670082.0   109.105263   120.435080  ...    95.0   125.0    4647.0
+## DiscPer          670082.0     0.382138     3.200854  ...     0.0     0.0     100.0
+## DiscAmount       670082.0     8.756731    95.321598  ...     0.0     0.0   14830.0
+## BarcodeDiscPer   670082.0    17.706990    20.796915  ...    20.0    30.0      60.0
+## BarcodeDiscount  670082.0   423.838609   536.809144  ...   484.0   713.0   32085.0
+## NetAmount        670082.0  1849.731244  1581.756942  ...  1747.0  2295.0   82102.0
+## PointsEarned     670082.0     1.078650     6.030229  ...     0.0     0.0     821.0
+## TaxPer           670082.0     6.359038     0.973759  ...     6.0     6.0       9.0
+## 
+## [13 rows x 8 columns]
+```
+
+---
+
+# Data Transformation
+
+Now we will treat the data with outliers and apply some statistical tests 
+
+There are many outliers in numerical columns which can be shown by boxplot. We will use the IQR method to remove the outliers.
+
+
+```python
+cols = df.select_dtypes(include='number')
+cat_cols = cols
+name = cols.columns
+i=0
+while i &lt; 10:
+    fig = plt.figure(figsize=[15,4])
+    
+    plt.subplot(1,3,1)
+    box=sns.boxplot(x=cat_cols.iloc[:,i], data=df, color='orange',width=1,linewidth=2.5,
+        dodge=True,saturation=1,orient='v' ,whis=1.5, fliersize=2)
+    box.set_xlabel(name[i]) 
+    i += 1
+    
+    plt.subplot(1,3,2)
+    box=sns.boxplot(x=cat_cols.iloc[:,i], data=df, color='orange',width=1, linewidth=2.5, 
+        dodge=True,saturation=1,whis=1.5, fliersize=2)
+    box.set_xlabel(name[i])    
+    i += 1
+    
+    plt.show()
+```
+
+&lt;img src="project_2_modified_files/figure-html/unnamed-chunk-22-3.png" width="1440" /&gt;&lt;img src="project_2_modified_files/figure-html/unnamed-chunk-22-4.png" width="1440" /&gt;&lt;img src="project_2_modified_files/figure-html/unnamed-chunk-22-5.png" width="1440" /&gt;&lt;img src="project_2_modified_files/figure-html/unnamed-chunk-22-6.png" width="1440" /&gt;&lt;img src="project_2_modified_files/figure-html/unnamed-chunk-22-7.png" width="1440" /&gt;&lt;img src="project_2_modified_files/figure-html/unnamed-chunk-22-8.png" width="1440" /&gt;
+
+---
+
+
+
+
+```python
+# Function for imputing outliers in numeric columns
+
+
+def impute_outliers_IQR_with_median(df):
+   Q1=df.quantile(0.25)
+   Q3=df.quantile(0.75)
+   IQR=Q3-Q1
+    # Lower bound
+   lower = Q1 - 1.5*IQR
+    # Upper bound
+   upper = Q3 + 1.5*IQR
+   df = np.where(df &gt; upper,
+*      df.median(),
+       np.where(
+           df &lt; lower,
+           df.median(),
+           df
+           )
+       )
+   return df
+```
+
+
+```python
+# Imputing outliers with mean
+def impute_outliers_IQR_with_mean(df):
+   Q1=df.quantile(0.25)
+   Q3=df.quantile(0.75)
+   IQR=Q3-Q1
+    # Lower bound
+   lower = Q1 - 1.5*IQR
+    # Upper bound
+   upper = Q3 + 1.5*IQR
+   df = np.where(df &gt; upper,
+       df.mean(),
+       np.where(
+           df &lt; lower,
+*          df.mean(),
+           df
+           )
+       )
+   return df
+```
+
+
+### Checking skewness of the data 
+
+
+```python
+# Library for skewness
+from scipy.stats import skew
+skew(df.Price)
+```
+
+```
+## 1.7332960811793
+```
+
+```python
+skew(df.Amount)
+```
+
+```
+## 0.5264229479147174
+```
+
+```python
+skew(df.SaleExclGST)
+```
+
+```
+## 0.053907402377267245
+```
+
+```python
+skew(df.GSTP)
+```
+
+```
+## 3.422663381156023
+```
+
+```python
+skew(df.GST)
+```
+
+```
+## 1.8886742450354679
+```
+
+```python
+skew(df.BarcodeDiscPer)
+```
+
+```
+## -0.11344278021015818
+```
+
+```python
+skew(df.BarcodeDiscount)
+```
+
+```
+## 1.639017468026673
+```
+
+```python
+skew(df.NetAmount)
+```
+
+```
+## 0.11210500286062883
+```
+
+```python
+skew(df.PointsEarned)
+```
+
+```
+## 21.43903163597488
+```
+
+
+
+```python
+cols=df.select_dtypes(include='number')
+cat_cols = cols
+i=0
+while i &lt; 10:
+    fig = plt.figure(figsize=[25,4])
+ 
+    plt.subplot(1,3,1)
+    sns.distplot(a=cat_cols.iloc[:,i], hist=True)
+    i += 1
+    
+    plt.subplot(1,3,2)
+    sns.distplot(a=cat_cols.iloc[:,i], hist=True)
+    i += 1
+    
+    plt.show()
+```
+
+&lt;img src="project_2_modified_files/figure-html/unnamed-chunk-26-15.png" width="2400" /&gt;&lt;img src="project_2_modified_files/figure-html/unnamed-chunk-26-16.png" width="2400" /&gt;&lt;img src="project_2_modified_files/figure-html/unnamed-chunk-26-17.png" width="2400" /&gt;&lt;img src="project_2_modified_files/figure-html/unnamed-chunk-26-18.png" width="2400" /&gt;&lt;img src="project_2_modified_files/figure-html/unnamed-chunk-26-19.png" width="2400" /&gt;&lt;img src="project_2_modified_files/figure-html/unnamed-chunk-26-20.png" width="2400" /&gt;
+
+![](/Users/snawaz/Downloads/telegram/final_graphs/dist_not_norm/Amount_and_SaleExclGST_2.png)
+![](/Users/snawaz/Downloads/telegram/final_graphs/dist_not_norm/BarcodeDiscPer_and_BarcodeDiscount.png)
+![](/Users/snawaz/Downloads/telegram/final_graphs/dist_not_norm/DiscPer_and_DiscAmount_2.png)
+![](/Users/snawaz/Downloads/telegram/final_graphs/dist_not_norm/Discper_and_Discamount.png)
+![](/Users/snawaz/Downloads/telegram/final_graphs/dist_not_norm/GSTP_vs_GST.png)
+![](/Users/snawaz/Downloads/telegram/final_graphs/dist_not_norm/Qty_and_Price.png)
+
+---
+
+
+Now by imputing positive skewed by median and negatively skewed by mean we will remove the outliers.
+
+
+```python
+df['Qty'] = impute_outliers_IQR_with_median(df['Qty'])
+df['Price'] = impute_outliers_IQR_with_mean(df['Price'])
+*df['Amount'] = impute_outliers_IQR_with_median(df['Amount'])
+df['SaleExclGST'] = impute_outliers_IQR_with_median(df['SaleExclGST'])
+df['GSTP'] = impute_outliers_IQR_with_median(df['GSTP'])
+df['GST'] = impute_outliers_IQR_with_median(df['GST'])
+df['BarcodeDiscPer'] = impute_outliers_IQR_with_mean(df['BarcodeDiscPer'])
+df['BarcodeDiscount'] = impute_outliers_IQR_with_median(df['BarcodeDiscount'])
+df['NetAmount'] = impute_outliers_IQR_with_mean(df['NetAmount'])
+df['PointsEarned'] = impute_outliers_IQR_with_median(df['PointsEarned'])
+df['DiscPer'] = impute_outliers_IQR_with_median(df['DiscPer'])
+df['DiscAmount'] = impute_outliers_IQR_with_median(df['DiscAmount'])
+```
+
+![](/Users/snawaz/Downloads/telegram/Dis.png)
+![](/Users/snawaz/Downloads/telegram/GST.png)
+![](/Users/snawaz/Downloads/telegram/final_graphs/BarcodeDiscPer_and_BarcodeDiscount_2.png)
+![After outliers removal in numerical variables](/Users/snawaz/Downloads/telegram/Sale.png)
+
+---
+
+
+
+Next, we checked the Pearson correlation and visualized it through a heat map.  This shows which variables are highly correlated and in this case, “Qty” is highly correlated with “NetAmount”, “SalesExclGST” and “GST”.
+
+
+```python
+plt.figure(figsize=(20,15),dpi=600)
+sns.heatmap(df.corr(method='pearson'),annot=True)
+```
+
+&lt;img src="project_2_modified_files/figure-html/unnamed-chunk-28-27.png" width="1920" /&gt;
+
+---
+
+
+
+We can apply the shapiro wilk test to check if the data is normal. 
+
+
+```python
+# Shapiro wilk test
+*from scipy.stats import shapiro
+shapiro(df.Price)
+```
+
+```
+## ShapiroResult(statistic=0.8969478011131287, pvalue=0.0)
+## 
+## /opt/anaconda3/lib/python3.9/site-packages/scipy/stats/morestats.py:1760: UserWarning:
+## 
+## p-value may not be accurate for N &gt; 5000.
+```
+
+```python
+shapiro(df.Amount)
+```
+
+```
+## ShapiroResult(statistic=0.908415675163269, pvalue=0.0)
+```
+
+```python
+shapiro(df.SaleExclGST)
+```
+
+```
+## ShapiroResult(statistic=0.8960244059562683, pvalue=0.0)
+```
+
+```python
+shapiro(df.GSTP)
+```
+
+```
+## ShapiroResult(statistic=0.6320035457611084, pvalue=0.0)
+```
+
+```python
+shapiro(df.GST)
+```
+
+```
+## ShapiroResult(statistic=0.8931977152824402, pvalue=0.0)
+```
+
+```python
+shapiro(df.BarcodeDiscPer)
+```
+
+```
+## ShapiroResult(statistic=0.8688030242919922, pvalue=0.0)
+```
+
+```python
+shapiro(df.BarcodeDiscount)
+```
+
+```
+## ShapiroResult(statistic=0.8954393863677979, pvalue=0.0)
+```
+
+```python
+shapiro(df.NetAmount)
+```
+
+```
+## ShapiroResult(statistic=0.9133129715919495, pvalue=0.0)
+```
+
+```python
+shapiro(df.PointsEarned)
+
+```
+
+```
+## ShapiroResult(statistic=1.0, pvalue=1.0)
+## 
+## /opt/anaconda3/lib/python3.9/site-packages/scipy/stats/morestats.py:1757: UserWarning:
+## 
+## Input data for shapiro has range zero. The results may not be accurate.
+```
+
+
+---
+
+
+
+## Normalization of the numeric columns.
+
+### Methods of Normalization
+Four common normalization techniques may be useful:
+
+- scaling to a range(min-max)
+- clipping
+- log scaling
+- z-score
+
+We use the standard scaler to normalize the data.
+
+
+```python
+
+from sklearn.preprocessing import StandardScaler
+*scaler = StandardScaler()
+df[['Qty','Price','Amount','SaleExclGST','GSTP','GST','BarcodeDiscPer','BarcodeDiscount','NetAmount','PointsEarned','DiscPer','DiscAmount']] = scaler.fit_transform(df[['Qty','Price','Amount','SaleExclGST','GSTP','GST','BarcodeDiscPer','BarcodeDiscount','NetAmount','PointsEarned','DiscPer','DiscAmount']])
+```
+
+Checking the normality after normalization
+
+
+```python
+from scipy.stats import shapiro
+print('ShapiroTest of Price',shapiro(df.Price))
+```
+
+```
+## ShapiroTest of Price ShapiroResult(statistic=0.8945704102516174, pvalue=0.0)
+## 
+## /opt/anaconda3/lib/python3.9/site-packages/scipy/stats/morestats.py:1760: UserWarning:
+## 
+## p-value may not be accurate for N &gt; 5000.
+```
+
+```python
+print('ShapiroTest of Amount',shapiro(df.Amount))
+```
+
+```
+## ShapiroTest of Amount ShapiroResult(statistic=0.9033786058425903, pvalue=0.0)
+```
+
+```python
+print('ShapiroTest of SaleExclGST',shapiro(df.SaleExclGST))
+```
+
+```
+## ShapiroTest of SaleExclGST ShapiroResult(statistic=0.8960385918617249, pvalue=0.0)
+```
+
+```python
+print('ShapiroTest of GSTP',shapiro(df.GSTP))
+```
+
+```
+## ShapiroTest of GSTP ShapiroResult(statistic=0.6283426880836487, pvalue=0.0)
+```
+
+```python
+print('ShapiroTest of GST',shapiro(df.GST))
+```
+
+```
+## ShapiroTest of GST ShapiroResult(statistic=0.8964444398880005, pvalue=0.0)
+```
+
+```python
+print('ShapiroTest of BarcodeDiscPer',shapiro(df.BarcodeDiscPer))
+```
+
+```
+## ShapiroTest of BarcodeDiscPer ShapiroResult(statistic=0.8605928421020508, pvalue=0.0)
+```
+
+```python
+print('ShapiroTest of BarcodeDiscount',shapiro(df.BarcodeDiscount))
+```
+
+```
+## ShapiroTest of BarcodeDiscount ShapiroResult(statistic=0.8955459594726562, pvalue=0.0)
+```
+
+```python
+print('ShapiroTest of NetAmount',shapiro(df.NetAmount))
+```
+
+```
+## ShapiroTest of NetAmount ShapiroResult(statistic=0.9149541854858398, pvalue=0.0)
+```
+
+```python
+print('ShapiroTest of PointsEarned',shapiro(df.PointsEarned))
+```
+
+```
+## ShapiroTest of PointsEarned ShapiroResult(statistic=1.0, pvalue=1.0)
+## 
+## /opt/anaconda3/lib/python3.9/site-packages/scipy/stats/morestats.py:1757: UserWarning:
+## 
+## Input data for shapiro has range zero. The results may not be accurate.
+```
+
+```python
+print('ShapiroTest of DiscPer',shapiro(df.DiscPer))
+```
+
+```
+## ShapiroTest of DiscPer ShapiroResult(statistic=1.0, pvalue=1.0)
+```
+
+```python
+print('ShapiroTest of DiscAmount',shapiro(df.DiscAmount))
+```
+
+```
+## ShapiroTest of DiscAmount ShapiroResult(statistic=1.0, pvalue=1.0)
+```
+
+![](/Users/snawaz/Downloads/telegram/final_graphs/dist_norm/1.png)
+![](/Users/snawaz/Downloads/telegram/final_graphs/dist_norm/2.png)
+![](/Users/snawaz/Downloads/telegram/final_graphs/dist_norm/3.png)
+![](/Users/snawaz/Downloads/telegram/final_graphs/dist_norm/4.png)
+![](/Users/snawaz/Downloads/telegram/final_graphs/dist_norm/5.png)
+
+---
+
+# Applying Statistical test
+
+
+```python
+import scipy.stats as stats
+
+# Load data
+df1 = pd.read_csv('/Users/snawaz/Documents/pychilla2/teamproject_sep3/Deep_note_linked/Normalized_data.csv')
+
+df_test = df1[['RegionName', 'Price', 'SaleExclGST']]
+# Indexing region name
+df_test.set_index('RegionName', inplace=True)
+# Dataframe for offline
+df_offline = df_test.loc[['1-KARACHI','2-LAHORE','3-NORTH ','4-CENTRAL PUNJAB ']]
+# Dataframe for online
+df_online = df_test.loc['5-WAREHOUSES']
+
+*stats.ttest_ind(df_offline['SaleExclGST'], df_online['SaleExclGST'])
+
+```
+
+```
+## Ttest_indResult(statistic=19.874566465306984, pvalue=7.163797500560876e-88)
+```
+
+```python
+del(df_test)
+del(df_offline)
+del(df_online)
+del(df)
+```
+
+
+## 1-way ANOVA Test on SaleExclGST for 3 regions
+
+
+```r
+library(tidyverse)
+df1 &lt;- py$df1
+
+Regions  &lt;- df1 %&gt;% filter(RegionName %in% c('1-KARACHI','2-LAHORE','3-NORTH '))
+model  &lt;- aov(SaleExclGST ~ RegionName, data = Regions)
+
+summary(model)
+```
+
+```
+##                 Df Sum Sq   Mean Sq F value   Pr(&gt;F)    
+## RegionName       2    0.0 0.0019590   9.678 6.27e-05 ***
+## Residuals   607200  122.9 0.0002024                     
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+```r
+rm(df1)
+```
+
+
+
+We apply the TukeyHSD test to check for which region company have significant difference from other regions.
+
+
+```r
+TukeyHSD(model)
+```
+
+```
+##   Tukey multiple comparisons of means
+##     95% family-wise confidence level
+## 
+## Fit: aov(formula = SaleExclGST ~ RegionName, data = Regions)
+## 
+## $RegionName
+##                             diff           lwr           upr     p adj
+## 2-LAHORE-1-KARACHI -1.866555e-04 -2.943515e-04 -7.895944e-05 0.0001439
+## 3-NORTH -1-KARACHI  2.546619e-05 -8.458279e-05  1.355152e-04 0.8503820
+## 3-NORTH -2-LAHORE   2.121216e-04  8.031625e-05  3.439270e-04 0.0004756
+```
+
+
+
+Results show that
+* Sales in Lahore is significantly different than sales in Karachi.
+* Sales in North is significantly different than sales in Karachi.
+* Sales in North and Lahore are not statistically significant from each other at 95% confidence interval. 
+
+
+
+---
+
+# Data Visualizations
+
+
+![](/Users/snawaz/Downloads/telegram/local_vs_import.png)
+
+
+
+![](/Users/snawaz/Downloads/telegram/T-shirts_colors.png)
+
+
+## Monthly revenue for the company 
+![](/Users/snawaz/Downloads/telegram/monthly_revenue.png)
+
+
+![](/Users/snawaz/Downloads/telegram/newplot_1.png)
+
+
+## Buyers by Region
+
+![](/Users/snawaz/Downloads/telegram/buyers.png)
+
+
+## Co-brands in demand
+
+![](/Users/snawaz/Downloads/telegram/co_brands.png)
+
+## Loyalty Card Holders
+
+![](/Users/snawaz/Downloads/telegram/pie.png)
+
+
+If you are feeling bored look at this cute cat!!!!!
+
+![](https://media.giphy.com/media/vFKqnCdLPNOKc/giphy.gif)
+
+---
+
+
+# Machine learning Model Building
+
+ML has been applying in the capacity of Regression, Classification,  Clustering and Deep Learning models. “Price” has been a dependent variable in every model except Classification. “Season” is used as a output variable in Classification. The concept of taking price, is to determine the customer behaviour with regards to price. 
+
+Dependent variables in various ML algorithms will be 
+* Price for linear regression where other select features will be independent variable.
+* Price for multilenar regression where all other variables will be independent.
+* Inventory_status and `LocalImport` where all other are independent variables in classification ML model.
+* Price in Deep learning model
+* 2 Clustering Models for SeasonName. 
+
+![](/Users/snawaz/Downloads/telegram/ML_flow.png)
+
+## Step_1: Encoding the categorical columns
+
+* We will use `One_Hot` encoding for 2 variables `Attribute8` which is actually the class of the sales and `Local Import`
+
+
+
+```python
+import pandas as pd
+df1=pd.read_excel('/Users/snawaz/Documents/pychilla2/teamproject_sep3/Deep_note_linked/Sales.xlsx')
+df=df1.copy()
+df_Ml = pd.read_csv("/Users/snawaz/Downloads/telegram/df_Ml.csv")
+df_M = df_Ml.sample(10000).reset_index(drop=True)
+```
+
+
+
+```python
+One_hot_encoded_data = df_Ml[['Offers']]
+
+enc = OneHotEncoder()
+enc_results = enc.fit_transform(One_hot_encoded_data)
+
+
+enc=pd.DataFrame(enc_results.toarray(), columns=enc.categories_)
+```
+
+---
+
+# Classification Models
+
+* Target feature: `Inventory_status` &amp; `LocalImport`
+* Independent features: All other features obrained after CV and feature selection
+
+
+
+
+## Local Import as target feature 
+
+### Step 1: Subset of large dataset
+* We selected a sample of 10000 rows for comparison of different classification model. 
+
+
+
+```python
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+import plotly.express as px
+from sklearn.impute import SimpleImputer
+```
+
+## Step2: Import data
+
+
+### Step2 Test train split the data
+* Data is splitted before hand with 30% test data and 70% train data.
+
+
+```python
+X=df_M.drop('LocalImport',axis=1)
+y=df_M['LocalImport']
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30, random_state=44, shuffle =True)
+```
+
+### Step 3: Make a list of classification models we want to apply
+
+
+```python
+final_clf = None
+clf_names = ["Logistic Regression", "KNN(3)", "XGBoost Classifier", "Random forest classifier", "Decision Tree Classifier",
+            "Gradient Boosting Classifier", "Support Vector Machine"]
+```
+
+### Step4: Apply each model on 10000 rows dataset and get the scores
+
+
+```python
+classifiers = []
+scores = []
+for i in range(10):
+    
+    tempscores = []
+    
+    # logistic Regression
+    lr_clf = LogisticRegression(n_jobs=-1)
+    lr_clf.fit(X_train, y_train)
+    tempscores.append((lr_clf.score(X_test, y_test))*100)
+    
+    # KNN n_neighbors = 3
+    knn3_clf = KNeighborsClassifier(n_jobs=-1)
+    knn3_clf.fit(X_train, y_train)
+    tempscores.append((knn3_clf.score(X_test, y_test))*100)
+
+    # XGBoost
+    xgbc = XGBClassifier(n_jobs=-1,seed=41)
+    xgbc.fit(X_train, y_train)
+    tempscores.append((xgbc.score(X_test, y_test))*100)
+
+    # Random Forest
+    rf_clf = RandomForestClassifier(n_jobs=-1)
+    rf_clf.fit(X_train, y_train)
+    tempscores.append((rf_clf.score(X_test, y_test))*100)
+
+    # Decision Tree
+    dt_clf = DecisionTreeClassifier()
+    dt_clf.fit(X_train, y_train)
+    tempscores.append((dt_clf.score(X_test, y_test))*100)
+
+    # Gradient Boosting 
+    gb_clf = GradientBoostingClassifier()
+    gb_clf.fit(X_train, y_train)
+    tempscores.append((gb_clf.score(X_test, y_test))*100)
+    
+    #SVM
+    svm_clf = SVC(gamma = "scale")
+    svm_clf.fit(X_train, y_train)
+    tempscores.append((svm_clf.score(X_test, y_test))*100)
+    
+    scores.append(tempscores)
+
+scores = np.array(scores)
+clfs = pd.DataFrame({"Classifier":clf_names})
+for i in range(len(scores)):
+    clfs['iteration' + str(i)] = scores[i].T
+
+means = clfs.mean(axis = 1)
+means = means.values.tolist()
+
+clfs["Average"] = means
+
+
+clfs.set_index("Classifier", inplace = True)
+print("Accuracies : ")
+clfs["Average"].head(10)
+```
+
+![image](/Users/snawaz/Pictures/screenshots/SCR-20220909-mnu.png)
+
+* At this stage we have got the best classification with highest accuracy for getting prediction of `LocalImport` variable. 
+
+
+
+### Step 5: Selecting full data for feature selection
+
+```python
+X=df_M.drop('LocalImport',axis=1)
+y=df_M['LocalImport']
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30, random_state=44, shuffle =True)
+
+print('X_train shape is ' , X_train.shape)
+print('X_test shape is ' , X_test.shape)
+print('y_train shape is ' , y_train.shape)
+print('y_test shape is ' , y_test.shape)
+```
+
+* Now comes the best feature selection part. We will use `RFE` to select the best features for each model.
+
+### Step 6: Select and plot best features by`features_importance` 
+
+```python
+model = GradientBoostingClassifier()
+model.fit(X,y)
+plt.style.use('ggplot')
+plt.figure(figsize=(6,10))
+feat_importances = pd.Series(model.feature_importances_, index=X.columns)
+feat_importances.nlargest(50).plot(kind='barh')
+plt.savefig("extra_tree.png",dpi=200)
+plt.show()
+```
+
+![image](/Users/snawaz/Documents/pychilla2/teamproject_sep3/Deep_note_linked/localImport_best_features.png)
+
+Only 7 features are good enough out of 38 to train our final model. so we drop rest of the features below.
+
+
+
+```python
+df_M = df_Ml[['BrandName','Attribute5','GSTP','SeasonName','BillMonth','Price','DesignNo','Import_type','LocalImport']]
+```
+
+We could also select Pearson's corelation coefficient values 
+
+### Step 7: Hyperparameters selection
+
+Making a dictionary of the hyperparamters for `Gradient boost` model. We will apply grid cross validation approach to select best hyperparamters for our selected model.
+
+
+```python
+#Creating Parameters
+params = {
+    'learning_rate':[0.1,1],
+    'n_estimators':[5,9, 11,12,13,15,20,25,26,29,31,20,50,75,100],
+    'max_features':['auto','sqrt','log2'],
+    'criterion':['friedman_mse', 'squared_error', 'mse'],
+    'loss':['log_loss', 'deviance', 'exponential']
+}
+
+
+#Fitting the model
+
+from sklearn.model_selection import GridSearchCV
+
+rf = GradientBoostingClassifier()
+grid = GridSearchCV(rf, params, cv=3, scoring='accuracy')
+grid.fit(X_train, y_train)
+print(grid.best_params_)
+print("Accuracy:"+ str(grid.best_score_))
+```
+
+{'criterion': 'friedman_mse', 'learning_rate': 1, 'loss': 'exponential', 'max_features': 'auto', 'n_estimators': 75}
+Accuracy:1.0
+
+* It gives us the best hyperpatamters at scoring paramter chosen as accuracy.
+
+* Remember model will remain the same with similar X_train, y_train data. 
+
+
+### Step 8: Final application of model
+
+
+```python
+# applying model with best hyperparameters
+
+rf = GradientBoostingClassifier(criterion='friedman_mse', learning_rate=1, loss='exponential', max_features='auto', n_estimators=75)
+
+rf.fit(X_train, y_train)
+
+y_pred = rf.predict(X_test)
+
+# from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+
+print("Accuracy Score: ", accuracy_score(y_test, y_pred))
+
+print("Confusion Matrix: ", confusion_matrix(y_test, y_pred)) 
+```
+
+Accuracy Score:  1.0
+Confusion Matrix: 
+ [[  9895      0]
+ [     0 191130]]
+
+* We have got 100% accuracy for our final model.
+
+### Step9: Model scores and evaluation
+
+
+```python
+from sklearn.naive_bayes import GaussianNB
+from yellowbrick.classifier import ClassificationReport
+
+# Instantiate the classification model and visualizer
+
+visualizer = ClassificationReport(rf)
+
+visualizer.fit(X_train, y_train)  # Fit the visualizer and the model
+visualizer.score(X_test, y_test)  # Evaluate the model on the test data
+visualizer.show() 
+```
+
+![image](/Users/snawaz/Documents/pychilla2/teamproject_sep3/Deep_note_linked/localImport_scores.png)
+
+### Step 10: Saving the model to get prediction later
+  
+
+```python
+import pickle
+pkl_filename = "localImport_model.pkl"
+with open(pkl_filename, 'wb') as file:
+    pickle.dump(grid, file)
+
+# Load from file
+with open(pkl_filename, 'rb') as file:
+    pickle_model = pickle.load(file)
+
+# Calculate the accuracy score and predict target values
+score = pickle_model.score(X_test, y_test)
+
+
+y_predict = pickle_model.predict(X_test)
+```
+
+---
+
+# Classification Models
+
+## `Inventory_status` as target feature. 
+
+
+Best Params: {'criterion': 'entropy', 'max_features': None, 'n_estimators': 75, 'random_state': 1}
+Train MSE: 0.0	Test MSE: 0.146
+
+
+```python
+modelkn = RandomForestClassifier(random_state=1,criterion= 'entropy' ,n_jobs=-1, n_estimators=75, max_features=None) 
+
+modelkn= modelkn.fit(X_train,y_train)
+
+y_11 = modelkn.predict(X_test)
+```
+
+Model scores for inventory_status
+
+![image](/Users/snawaz/Documents/pychilla2/teamproject_sep3/Deep_note_linked/inventory_status_scores.png)
+
+
+Confusion matrix for inventory_status
+
+
+![image](/Users/snawaz/Documents/pychilla2/teamproject_sep3/Deep_note_linked/inventory_status_confusion_matrix.png)
+
+---
+
+# Regression Models
+
+## Price and SaleExclGST as target features. 
+
+* Target features: `Price` of article. &amp; `SaleExclGST` gained by company +`NetAmount` paid by customer.
+* In one regression model there is only 1 target feature while in the other there are two target features.
+
+* Only difference from the previous approach is the use of RepeatedKFold cross validation method to get the best model. 
+
+* Model evaluation is done by `R2` score and negative `RMSE` score.
+* Again we use sample of 10000 rows to compare models followed by full sample to train the final model.
+
+
+
+```r
+models = {}
+models['lr']= LinearRegression()
+models['dr'] = DecisionTreeRegressor()
+models['rf'] = RandomForestRegressor()
+models['kn']=  KNeighborsRegressor()
+models['ad'] = AdaBoostRegressor()
+models['ex'] = ExtraTreesRegressor()
+models['sv'] = SVR()
+
+
+from sklearn import model_selection
+
+for model in models:
+  cv = sklearn.model_selection.RepeatedKFold(n_splits=100,n_repeats=1,random_state=1)
+  n_scores = model_selection.cross_val_score(models[model],X,y,scoring='neg_root_mean_squared_error',cv=cv,n_jobs=-1)
+  print(model, np.mean(n_scores),np.std(n_scores))
+```
+
+lr -0.015952386710040633 0.023420996302700597
+dr -0.0684330302042271 0.13595572185672142
+rf -0.05608366484049382 0.13108548370117068
+kn -0.953965008983964 0.20208368080610473
+ex -0.056439850981039486 0.19471193286786767
+
+We picked Random Forest regressor for further analysis. 
+
+
+### Features selection by two methods: `RFECV` method 
+
+![image](/Users/snawaz/Documents/pychilla2/teamproject_sep3/Deep_note_linked/price_sales_features1.png)
+
+
+![image](/Users/snawaz/Documents/pychilla2/teamproject_sep3/Deep_note_linked/price_Sales_feature2.png)
+
+Best Hyperparameters  for Price prediction are:
+ {'criterion': 'absolute_error', 'max_features': 'sqrt', 'n_estimators': 11, 'random_state': 33}
+Train MSE: 0.01264030494634164	Test MSE: 0.003932264888039404
+
+
+After putting 5 features and above hyperparameters we get model scores as
+Test MSE:  0.003932264888039404
+Test RMSE:  0.001966132444019702
+
+R-squared score (training): 0.986
+R-squared score (test): 0.995
+
+
+![Price prediction](/Users/snawaz/Documents/pychilla2/teamproject_sep3/Deep_note_linked/price_sales_prediction1.png)
+
+
+![Revenue prediction ](/Users/snawaz/Documents/pychilla2/teamproject_sep3/Deep_note_linked/revenue.png)
+
+---
+
+# Regression Models
+
+## Price as target feature.
+
+Regression Models comparison for prediciting price. Neg. RMSE score is used as evaluation metric.
+
+
+![image](/Users/snawaz/Downloads/telegram/photo_2022-09.jpeg)
+
+RandomForestRegressor had the highest RMSE so we choose this model for further analysis.
+
+optimum features selection for price prediction by running 
+
+![image](/Users/snawaz/Downloads/telegram/photo_2022-09-09.jpeg)
+
+![image](/Users/snawaz/Downloads/telegram/photo_2022-09-092.jpeg)
+
+Best hyperparameters for price prediction by `GridSearchCV` method 
+
+Best Params: {'criterion': 'squared_error', 'max_features': 'sqrt', 'random_state': 42, 'splitter': 'best'}
+Train MSE: 1.331754172731566e-06	Test MSE: 0.002528635026436538
+
+
+```python
+modelkn = DecisionTreeRegressor(criterion= 'squared_error', max_features= 'sqrt', random_state= 42, splitter= 'best') 
+
+modelkn= modelkn.fit(X_train,y_train)
+
+y_11 = modelkn.predict(X_test)
+```
+
+
+In the we get R2 score of 1
+
+![image](/Users/snawaz/Documents/pychilla2/teamproject_sep3/Deep_note_linked/price_prediction.png)
+
+and other score are given below
+
+
+R-squared score (training): 1.000
+R-squared score (test): 0.997
+
+Test MSE:  0.002528635026436538
+Test RMSE:  0.001264317513218269
+
+
+---
+
+# Clustering Models
+
+We will select the variable `seasonName`. Finding the best number of clusters using `elbow method` and `silhouette score`.
+
+## Finding best number of clusters
+
+### Silhoutte method
+
+
+```python
+X = df_M.drop(["SeasonName"], axis = 1)
+y = df_M[["SeasonName"]]
+
+fig, ax = plt.subplots(3, 2, figsize=(15,8))
+for i in [2, 3, 4, 5, 6, 7]:
+    '''
+    Create KMeans instance for different number of clusters
+    '''
+    km = KMeans(n_clusters=i, init='k-means++', n_init=10, max_iter=100, random_state=42)
+    q, mod = divmod(i, 2)
+    '''
+    Create SilhouetteVisualizer instance with KMeans instance
+    Fit the visualizer
+    '''
+    visualizer = SilhouetteVisualizer(km, colors='yellowbrick', ax=ax[q-1][mod])
+    visualizer.fit(X)
+```
+
+
+![image](/Users/snawaz/Documents/pychilla2/teamproject_sep3/Deep_note_linked/silhoute_score.png)
+
+
+### Elbow method
+
+```python
+inertias = []
+for n_clusters in range(2, 15):
+ km = KMeans(n_clusters=n_clusters).fit(df_Ml)
+ inertias.append(km.inertia_)
+ 
+plt.plot(range(2, 15), inertias, ‘k’)
+plt.title(“Inertia vs Number of Clusters”)
+plt.xlabel(“Number of clusters”)
+plt.ylabel(“Inertia”)
+```
+
+
+![image](/Users/snawaz/Documents/pychilla2/teamproject_sep3/Deep_note_linked/kmeans_cluster.png)
+
+---
+
+# Clustering Models
+
+## Prinicpal Component Analysis
+
+
+
+
+```python
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.decomposition import PCA
+X = df_M.drop(["SeasonName"], axis = 1)
+y = df_M[["SeasonName"]]
+
+X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.3)
+
+pca = PCA(n_components=2)
+
+projected=pca.fit_transform(X_train)
+pca.transform(X_test)
+
+pca.explained_variance_ratio_
+```
+
+
+
+```python
+plt.scatter(projected[:, 0], projected[:, 1],
+            c=projected[:,0], edgecolor='none', alpha=0.5,
+            cmap=plt.cm.get_cmap('CMRmap', 10))
+plt.xlabel('component 1')
+plt.ylabel('component 2')
+plt.colorbar()
+```
+
+![image](/Users/snawaz/Downloads/telegram/pca.png)
+
+
+```python
+## DBSCAN Clustering
+```
+
+```python
+from sklearn.cluster import DBSCAN
+db = DBSCAN(eps=0.4, min_samples=20)
+db.fit(X)
+
+y_pred = db.fit_predict(X)
+plt.figure(figsize=(10,6))
+plt.scatter(X['SaleExclGST'], y['SeasonName'],c=y_pred, cmap='Paired')
+plt.title("Clusters determined by DBSCAN")
+```
+
+![](/Users/snawaz/Downloads/telegram/dbscan.png)
+
+---
+
+# Deep learning Model for Price prediction
+
+We are using the sequential model with 4 fully-connected layers. ReLU is more popular in many deep neural networks, but I am using Tanh for activation on trial basis. 
+
+&lt;/n&gt; 
+You almost never use Sigmoid because it is slow to train. We can add drop out layer to reduce overfitting
+
+Adam loss function is used for model compilation. 
+
+
+
+```python
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Input, Dense, Activation, Dropout
+from tensorflow.keras.optimizers import Adam
+
+X_train = np.array(X_train)
+X_test = np.array(X_test)
+y_train = np.array(y_train)
+y_test = np.array(y_test)
+
+model = Sequential()
+
+model.add(Dense(X_train.shape[1], activation='relu'))
+model.add(Dense(32, activation='Tanh'))
+model.add(Dropout(0.2))
+
+model.add(Dense(64, activation='Tanh'))
+model.add(Dropout(0.2))
+
+model.add(Dense(128, activation='Tanh'))
+# model.add(Dropout(0.2))
+
+model.add(Dense(512, activation='Tanh'))
+model.add(Dropout(0.1))
+model.add(Dense(1))
+
+model.compile(optimizer=Adam(0.00001), loss='mse')
+
+r = model.fit(X_train, y_train,
+              validation_data=(X_test,y_test),
+              batch_size=1,
+              epochs=100)
+```
+
+
+
+
+
+
+
+---
+
+# Conclusion
+
+* Cambridge Industries makes a database of their sales. 
+
+* All the information related to customer choices such as loyalty card, product exchanges and type of product bought is available is the database.
+
+* We have performed EDA analysis followed by data cleaning and feature engineering. 
+
+* Statistical aanalysis show that there is significant difference between sales offline and online sales offered by the company. 
+
+* We have taken subset of data based on different products and locations. A map was shown where the products are bought and delivered.
+
+* We have used different machine learning models to predict the price of the product such regression, classification, clustering and deep neural network with output features Sales (revenue of the company), inventory_status, SeasonName and Price respectively. 
+
+* In the end we conclude that Company should focus on the products which are in high demand and are in stock.
+
+---
+
+# Future Direction
+
+* We can use more data to predict the price of the product.
+* Apply more deep neural network models to get prediction.
+* Computer vision techniques to classify the clothes and make a recommendation system.
+* Training of sales staff since many columns have missing values.
+* Better renaming of bill numbers to get more information about the new and exchanged products.
+---
+
+# Tools and Project Links
+
+* Deepnote - https://deepnote.com/
+* Github Organization Repository - https://github.com/Team-Shah-Nawaz/Team-Shah-Nawaz.github.io.git
+* Github Pages  - https://team-shah-nawaz.github.io/
+* Streamlit App link for the project - https://ahamza56-web-app-project-app-6ia120.streamlitapp.com/
+* Google Colab for model training.
+* Rmarkdown with Xaringan package for presentation.
+
+---
+
+# Team Members
+
+* Shah Nawaz (Phd Student, University Grenoble Alpe, France) (Team lead)(shah.nawaz@univ-grenoble-alpes.fr)
+* Saleha Attiq (Lahore college for women University) (co-lead)
+* Rabia Attiq (National Transmission and Dispatch company, Pakistan)
+* Muhammad Abdullah (University of Haripur)
+* Ali Hamza (University of Agriculture, Fsd)
+* Muhammad Wasif (University of Sindh, Jamshoro)
+* Ali Hasnain (Mehran University, Jamshoro)
+* Karan Kumar (Mehran University, Jamshoro)
+* Naveedul Mustafa (TU berlin, Germany)
+
+---
+
+THANK YOU
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": true,
+"navigation": {
+"scroll": false,
+"ratio": "16:9"
+}
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+(function(time) {
+  var d2 = function(number) {
+    return ('0' + number).slice(-2); // left-pad 0 to minutes/seconds
+  },
+
+  time_format = function(total) {
+    var secs = Math.abs(total) / 1000;
+    var h = Math.floor(secs / 3600);
+    var m = Math.floor(secs % 3600 / 60);
+    var s = Math.round(secs % 60);
+    var res = d2(m) + ':' + d2(s);
+    if (h > 0) res = h + ':' + res;
+    return res;  // [hh:]mm:ss
+  },
+
+  slide_number_div = function(i) {
+    return document.getElementsByClassName('remark-slide-number').item(i);
+  },
+
+  current_page_number = function(i) {
+    return slide_number_div(i).firstChild.textContent;  // text "i / N"
+  };
+
+  var timer = document.createElement('span'); timer.id = 'slide-time-left';
+  var time_left = time, k = slideshow.getCurrentSlideIndex(),
+      last_page_number = current_page_number(k);
+
+  setInterval(function() {
+    time_left = time_left - 1000;
+    timer.innerHTML = ' ' + time_format(time_left);
+    if (time_left < 0) timer.style.color = 'red';
+  }, 1000);
+
+  slide_number_div(k).appendChild(timer);
+
+  slideshow.on('showSlide', function(slide) {
+    var i = slide.getSlideIndex(), n = current_page_number(i);
+    // reset timer when a new slide is shown and the page number is changed
+    if (last_page_number !== n) {
+      time_left = time; last_page_number = n;
+      timer.innerHTML = ' ' + time_format(time); timer.style.color = null;
+    }
+    slide_number_div(i).appendChild(timer);
+  });
+})(60000);
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
